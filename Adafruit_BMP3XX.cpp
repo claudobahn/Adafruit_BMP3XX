@@ -351,14 +351,14 @@ bool Adafruit_BMP3XX::performReading(void) {
   if (rslt != BMP3_OK)
     return false;
 
-  /* Set the power mode */
-  the_sensor.settings.op_mode = BMP3_MODE_FORCED;
+  if (the_sensor.settings.op_mode == BMP3_MODE_FORCED) {
 #ifdef BMP3XX_DEBUG
-  Serial.println(F("Setting power mode"));
+    Serial.println(F("Setting power mode"));
 #endif
-  rslt = bmp3_set_op_mode(&the_sensor);
-  if (rslt != BMP3_OK)
-    return false;
+    rslt = bmp3_set_op_mode(&the_sensor);
+    if (rslt != BMP3_OK)
+      return false;
+  }
 
   /* Variable used to store the compensated data */
   struct bmp3_data data;
@@ -481,6 +481,24 @@ bool Adafruit_BMP3XX::setOutputDataRate(uint8_t odr) {
   _ODREnabled = true;
 
   return true;
+}
+
+/**************************************************************************/
+/*!
+    @brief  Setter for operation mode
+    @param op_mode Operation mode. Can be BMP3_MODE_FORCED (default),
+   BMP3_MODE_NORMAL, or BMP3_MODE_SLEEP
+    @return True on success, False on failure
+
+*/
+/**************************************************************************/
+bool Adafruit_BMP3XX::setOperationMode(uint8_t op_mode) {
+  if (op_mode > BMP3_MODE_NORMAL)
+    return false;
+
+  the_sensor.settings.op_mode = op_mode;
+
+  return BMP3_OK == bmp3_set_op_mode(&the_sensor);
 }
 
 /**************************************************************************/
